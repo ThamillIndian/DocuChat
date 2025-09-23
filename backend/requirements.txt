@@ -1,0 +1,15 @@
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+python-multipart>=0.0.6
+pydantic>=2.7.0
+httpx>=0.24.0
+PyPDF2>=3.0.0
+google-genai>=0.8.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+langchain>=0.1.0
+langchain-google-genai>=0.0.8
+# Audio transcription dependencies
+openai-whisper>=20231117
+# Optional: For better audio format support
+# ffmpeg-python>=0.2.0
