@@ -1,14 +1,30 @@
 import os
-import requests
 import json
 from typing import Dict, Any
 from .asr_fallback import transcribe_with_whisper, transcribe_with_ffmpeg_whisper
+
+# Safe import for requests
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+    requests = None
 
 def transcribe(file_bytes: bytes, filename: str, mime: str) -> dict:
     """
     Transcribe audio/video using Sarvam AI Speech-to-Text API
     Supports both Real-time API (for short files) and Batch API (for longer files)
     """
+    # Check if requests module is available
+    if not REQUESTS_AVAILABLE:
+        return {
+            "text": f"[SARVAM-ASR: requests module not available for {filename}. Using fallback transcription.]",
+            "segments": [],
+            "lang": "auto",
+            "meta": {"filename": filename, "mime": mime, "error": "requests_not_available"}
+        }
+    
     api_key = os.getenv("SARVAM_API_KEY")
     
     if not api_key:
