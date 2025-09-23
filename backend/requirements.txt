@@ -9,7 +9,3 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 langchain>=0.1.0
 langchain-google-genai>=0.0.8
-# Audio transcription dependencies
-openai-whisper>=20231117
-# Optional: For better audio format support
-# ffmpeg-python>=0.2.0
