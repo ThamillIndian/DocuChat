@@ -4,6 +4,8 @@ LangChain-based conversational chat service with prompt chaining
 import os
 import time
 from typing import Generator, List, Dict, Any, Optional
+
+# Safe imports for LangChain
 try:
     from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
     from langchain.schema import HumanMessage, AIMessage, SystemMessage
@@ -15,6 +17,45 @@ try:
     LANGCHAIN_AVAILABLE = True
 except ImportError:
     LANGCHAIN_AVAILABLE = False
+    # Create dummy classes to prevent NameError
+    class ChatPromptTemplate:
+        @staticmethod
+        def from_messages(messages):
+            return None
+    class MessagesPlaceholder:
+        def __init__(self, variable_name):
+            self.variable_name = variable_name
+    class HumanMessage:
+        def __init__(self, content):
+            self.content = content
+    class AIMessage:
+        def __init__(self, content):
+            self.content = content
+    class SystemMessage:
+        def __init__(self, content):
+            self.content = content
+    class ConversationBufferWindowMemory:
+        def __init__(self, k, return_messages, memory_key):
+            self.k = k
+            self.chat_memory = type('obj', (object,), {'messages': [], 'add_user_message': lambda x: None, 'add_ai_message': lambda x: None})()
+        def clear(self):
+            pass
+    class ConversationChain:
+        def __init__(self, llm, memory, prompt, verbose):
+            self.llm = llm
+            self.memory = memory
+            self.prompt = prompt
+        def predict(self, input):
+            return "LangChain not available"
+    class ChatGoogleGenerativeAI:
+        def __init__(self, model, google_api_key, temperature, max_output_tokens):
+            pass
+        def invoke(self, messages):
+            return type('obj', (object,), {'content': 'LangChain not available'})()
+    class StrOutputParser:
+        pass
+    class RunnablePassthrough:
+        pass
 
 class ConversationalChatService:
     """LangChain-based conversational chat with memory"""
@@ -45,6 +86,9 @@ class ConversationalChatService:
     def create_contextual_prompt(self, context: str, conversation_history: str = "") -> ChatPromptTemplate:
         """Create a contextual prompt template"""
         
+        if not LANGCHAIN_AVAILABLE:
+            return None
+        
         system_prompt = """You are a helpful AI assistant that answers questions based on provided documents and maintains conversation context.
 
 IMPORTANT RULES:
@@ -74,8 +118,16 @@ Please provide a helpful response based on the documents and conversation contex
     def chat_stream(self, question: str, context: str, conversation_history: str = "") -> Generator[str, None, None]:
         """Stream chat response with conversation context"""
         try:
+            if not LANGCHAIN_AVAILABLE:
+                yield "LangChain is not available. Please install langchain and langchain-google-genai packages."
+                return
+            
             # Create prompt template
             prompt_template = self.create_contextual_prompt(context, conversation_history)
+            
+            if prompt_template is None:
+                yield "Unable to create prompt template. LangChain may not be properly installed."
+                return
             
             # Create chain
             chain = prompt_template | self.llm | StrOutputParser()
