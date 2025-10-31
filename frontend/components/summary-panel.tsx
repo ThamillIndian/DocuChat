@@ -60,9 +60,14 @@ export default function SummaryPanel() {
 
   async function handleNewSession() {
     try {
+      // Clear old session first
+      clearSession()
+      // Create new session
       await createNewSession()
       setSummary(null)
       setError(null)
+      // Reload the page to reset all state
+      window.location.reload()
     } catch (e) {
       console.error('Failed to create new session:', e)
     }
