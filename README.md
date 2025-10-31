@@ -2,6 +2,12 @@
 
 A modern document chat application that allows users to upload documents and have intelligent conversations with them using AI. Built with FastAPI backend and Next.js frontend.
 
+## 🌐 Live Demo
+
+- **Frontend (Vercel)**: [https://docu-chat-mu.vercel.app/](https://docu-chat-mu.vercel.app/)
+- **Backend (Render)**: [https://docuchat-xurq.onrender.com/](https://docuchat-xurq.onrender.com/)
+- **API Documentation**: [https://docuchat-xurq.onrender.com/docs](https://docuchat-xurq.onrender.com/docs)
+
 ## 🚀 Features
 
 - **Document Upload**: Support for PDF files with intelligent text extraction
