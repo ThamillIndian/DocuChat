@@ -14,8 +14,10 @@ router = APIRouter()
 try:
     from ..services.langchain_chat import DocumentAwareChatService
     chat_service = DocumentAwareChatService()
-except ImportError:
-    # Fallback to simple chat service
+    print("✓ Using LangChain-based chat service")
+except (ImportError, ValueError) as e:
+    # Fallback to simple chat service if LangChain not available or API key missing
+    print(f"⚠ Falling back to SimpleConversationalChat: {e}")
     chat_service = SimpleConversationalChat()
 
 @router.post("/stream")
@@ -77,24 +79,31 @@ def chat_conversational(payload: ChatIn):
         sources = [{"source_id": h["source_id"], "chunk": h["span"]["chunk"]} for h in hits]
         yield f"event:meta\ndata:{sources}\n\n"
         
-        # Stream conversational response
+        # Stream conversational response and track full response
+        assistant_response = ""
         try:
             # Check if we have LangChain service or simple service
             if hasattr(chat_service, 'chat_with_documents'):
                 # LangChain service
                 for token in chat_service.chat_with_documents(payload.message, ctx, payload.session_id):
+                    assistant_response += token
                     yield f"data:{token}\n\n"
             else:
                 # Simple service
                 for token in chat_service.chat_with_documents(payload.message, ctx, conversation_history):
+                    assistant_response += token
                     yield f"data:{token}\n\n"
             
-            # Add to conversation memory
-            conversation.add_message("user", payload.message)
-            # Note: Assistant message will be added after streaming completes
+            # Save both user and assistant messages to conversation memory
+            conversation.add_message("user", payload.message, sources)
+            conversation.add_message("assistant", assistant_response.strip())
             
         except Exception as e:
-            yield f"data:Error: {str(e)}\n\n"
+            error_msg = f"Error: {str(e)}"
+            yield f"data:{error_msg}\n\n"
+            # Still save the conversation even if there's an error
+            conversation.add_message("user", payload.message, sources)
+            conversation.add_message("assistant", error_msg)
         
         yield "event:done\ndata:ok\n\n"
 

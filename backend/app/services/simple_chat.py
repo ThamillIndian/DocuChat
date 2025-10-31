@@ -12,7 +12,8 @@ class SimpleConversationalChat:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         if not self.api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment")
+            print("⚠ Warning: GEMINI_API_KEY not found in environment - chat will use fallback")
+            # Don't raise error, let it fail gracefully in the chat method
     
     def chat_with_documents(self, question: str, context: str, conversation_history: str = "") -> Generator[str, None, None]:
         """Simple chat with document context and conversation history"""
